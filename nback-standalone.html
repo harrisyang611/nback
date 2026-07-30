@@ -325,6 +325,17 @@
                 </div>
             </div>
 
+            <div class="config-group">
+                <span class="group-label">Participant ID</span>
+                <input type="text" id="participant-id" name="participant_id"
+                    placeholder="Enter your participant ID"
+                    style="width:100%;box-sizing:border-box;padding:10px 14px;font-size:14px;
+                           border:2px solid #ddd;border-radius:6px;outline:none;
+                           font-family:Arial,sans-serif;transition:border-color 0.15s;"
+                    onfocus="this.style.borderColor='#4a90d9'"
+                    onblur="this.style.borderColor='#ddd'">
+            </div>
+
             <button type="submit" id="start-btn">Start Task</button>
         </form>
     </div>
@@ -3959,6 +3970,7 @@ function dbSaveSession(config) {
     tx.objectStore('sessions').add({
         id: sessionId,
         timestamp: new Date().toISOString(),
+        participantId: config.participantId,
         letterCase: config.letterCase,
         numLetters: config.numLetters,
         nbackLevel: config.nbackLevel,
@@ -3992,6 +4004,7 @@ window.onload = function() {
     document.getElementById('config-form').addEventListener('submit', function(e) {
         e.preventDefault();
         var config = {
+            participantId:   document.getElementById('participant-id').value.trim() || 'anonymous',
             letterCase:      document.querySelector('input[name="letter_case"]:checked').value,
             numLetters:      parseInt(document.querySelector('input[name="num_letters"]:checked').value),
             nbackLevel:      parseInt(document.querySelector('input[name="nback_level"]:checked').value),
@@ -4272,10 +4285,11 @@ function initExp(config) {
         // Save every trial to IndexedDB
         var stimText = BackArray[currentTrial].stimulus.replace(/<[^>]*>/g, '').trim();
         dbSaveTrial({
-            sessionId:    sessionId,
-            timestamp:    new Date().toISOString(),
-            trialNumber:  currentTrial,
-            nbackLevel:   currentnback,
+            sessionId:     sessionId,
+            participantId: config.participantId,
+            timestamp:     new Date().toISOString(),
+            trialNumber:   currentTrial,
+            nbackLevel:    currentnback,
             stimulus:     stimText,
             condition:    BackArray[currentTrial].condition,
             keyPressed:   trial_data.key_press === 32 ? 'space' : (trial_data.key_press === null ? 'none' : String.fromCharCode(trial_data.key_press)),
@@ -4372,9 +4386,11 @@ function displayResults(config) {
     var tdB = "style='border:1px solid #ddd;padding:12px;font-weight:bold;'";
     var tdBC= "style='border:1px solid #ddd;padding:12px;text-align:center;font-weight:bold;'";
 
+    var pid = config && config.participantId ? config.participantId : (window._lastConfig ? window._lastConfig.participantId : '—');
     var html =
         "<div style='padding:40px;max-width:660px;margin:auto;font-family:Arial,sans-serif;'>" +
-        "<h2 style='text-align:center;'>Your Results — " + nback + "-Back</h2>" +
+        "<h2 style='text-align:center;'>Results — " + nback + "-Back</h2>" +
+        "<p style='text-align:center;color:#555;margin-top:-8px;'>Participant: <b>" + pid + "</b></p>" +
         "<table style='margin:auto;border-collapse:collapse;width:100%;'>" +
         "<thead><tr style='background:#f0f7ff;'>" +
         "<th style='border:1px solid #ddd;padding:12px;'>Metric</th>" +
@@ -4413,10 +4429,11 @@ function downloadResults() {
         ? (hitVals.reduce(function(s, t) { return s + (t.rt || 0); }, 0) / hitVals.length).toFixed(0)
         : '';
 
-    var csv = "Condition,Hits,Misses,IncorrectRejections,HitRate%,Accuracy%,AvgRT_ms\n";
-    csv += nback + "-Back," + hits + "," + misses + "," + fa + "," +
+    var pid = window._lastConfig ? (window._lastConfig.participantId || 'anonymous') : 'anonymous';
+    var csv = "ParticipantId,Condition,Hits,Misses,IncorrectRejections,HitRate%,Accuracy%,AvgRT_ms\n";
+    csv += pid + "," + nback + "-Back," + hits + "," + misses + "," + fa + "," +
            hitRate + "," + accuracy + "," + avgRT + "\n";
-    downloadCSV(csv, 'nback-summary-' + new Date().toISOString().replace(/:/g,'-') + '.csv');
+    downloadCSV(csv, 'nback-summary-' + pid + '-' + new Date().toISOString().replace(/:/g,'-') + '.csv');
 }
 
 function downloadTrialData() {
@@ -4425,15 +4442,16 @@ function downloadTrialData() {
             alert("No trial data found for this session.");
             return;
         }
-        var csv = "id,sessionId,timestamp,trialNumber,nbackLevel,stimulus,condition,keyPressed,correct,responseType,rt\n";
+        var pid = window._lastConfig ? (window._lastConfig.participantId || 'anonymous') : 'anonymous';
+        var csv = "participantId,id,sessionId,timestamp,trialNumber,nbackLevel,stimulus,condition,keyPressed,correct,responseType,rt\n";
         trials.forEach(function(t) {
             csv += [
-                t.id, t.sessionId, t.timestamp, t.trialNumber, t.nbackLevel,
+                t.participantId || pid, t.id, t.sessionId, t.timestamp, t.trialNumber, t.nbackLevel,
                 t.stimulus, t.condition, t.keyPressed, t.correct, t.responseType,
                 t.rt !== null && t.rt !== undefined ? t.rt : ''
             ].join(',') + "\n";
         });
-        downloadCSV(csv, 'nback-trials-' + new Date().toISOString().replace(/:/g,'-') + '.csv');
+        downloadCSV(csv, 'nback-trials-' + pid + '-' + new Date().toISOString().replace(/:/g,'-') + '.csv');
     });
 }
 

@@ -15,6 +15,9 @@ This package contains a complete implementation of the n-back cognitive task, ex
 - **`nback.js`** - JavaScript code for the n-back task (for Qualtrics)
 - **`nback.html`** - HTML styling and library imports (for Qualtrics)
 - **`nback-standalone.html`** - Complete standalone version that works in any web browser
+- **`nback-image-standalone.html`** - Standalone version with image stimulus support
+- **`nback-touchscreen-standalone.html`** - Standalone version optimised for iPad/touchscreen, with image stimulus support
+- **`img/`** - Image stimuli folder (place `img1.png`, `img2.png`, … here for Images mode)
 - **`Qualtrics n-back test.pdf`** - Original research paper with full tutorial
 
 ## Quick Start
@@ -26,6 +29,34 @@ This package contains a complete implementation of the n-back cognitive task, ex
 3. Follow the on-screen instructions
 4. Results will be displayed at the end and saved to browser localStorage
 5. Download results as CSV using the button
+
+### Option 1b: Run Touchscreen / iPad Version
+
+**On desktop (letters mode only — no local server needed):**
+```bash
+open nback-touchscreen-standalone.html
+```
+
+**With Images mode, or to run on iPad (requires local server):**
+```bash
+cd /Users/Hades-611-Yang/Documents/PhD/MCMC/n-back
+python3 -m http.server 8000
+# Then open: http://localhost:8000/nback-touchscreen-standalone.html
+```
+
+**On iPad over Wi-Fi:**
+1. Run the server on your Mac (command above)
+2. Find your Mac's local IP:
+   ```bash
+   ipconfig getifaddr en0
+   ```
+3. On the iPad, open Safari and go to:
+   ```
+   http://<your-mac-ip>:8000/nback-touchscreen-standalone.html
+   ```
+   (Mac and iPad must be on the same Wi-Fi network)
+
+**Images mode:** place image files named `img1.png`, `img2.png`, … in the `img/` folder, then select **Images** in the Stimulus Type config before starting.
 
 ### Option 2: Integrate with Qualtrics
 
