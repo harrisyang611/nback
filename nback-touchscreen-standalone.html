@@ -4523,13 +4523,19 @@ function initExp(config) {
             var cr         = allData.filter({ CR: 1 }).count();
             var total      = allData.count();
             var accuracy   = total > 0 ? ((hits + cr) / total * 100).toFixed(1) : "0.0";
+            var hitVals    = allData.filter({ hit: 1 }).values();
+            var avgRT      = hitVals.length > 0
+                ? (hitVals.reduce(function(s, t) { return s + (t.rt || 0); }, 0) / hitVals.length).toFixed(0)
+                : "";
             window.parent.postMessage({
-                type:       "nback-complete",
-                nbackLevel: String(nback),
-                nBackFA:    String(fa),
-                nBackMISS:  String(miss),
-                hits:       String(hits),
-                accuracy:   accuracy
+                type:          "nback-complete",
+                nbackLevel:    String(nback),
+                nBackFA:       String(fa),
+                nBackMISS:     String(miss),
+                hits:          String(hits),
+                accuracy:      accuracy,
+                avgRT:         avgRT,
+                participantId: config.participantId || ""
             }, "*");
             // --- end postMessage block ---
 
