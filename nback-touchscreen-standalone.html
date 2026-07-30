@@ -4512,6 +4512,27 @@ function initExp(config) {
         display_element: "display_stage",
         on_finish: function() {
             console.log("Experiment completed!");
+
+            // --- postMessage to Qualtrics (for iframe embedding) ---
+            var nback      = config.nbackLevel;
+            var fa         = parseInt(localStorage.getItem("nBack" + nback + "FA")   || "0", 10);
+            var miss       = parseInt(localStorage.getItem("nBack" + nback + "MISS") || "0", 10);
+            var blockLabel = "block-" + nback + "back";
+            var allData    = jsPsych.data.get().filter({ block: blockLabel });
+            var hits       = allData.filter({ hit: 1 }).count();
+            var cr         = allData.filter({ CR: 1 }).count();
+            var total      = allData.count();
+            var accuracy   = total > 0 ? ((hits + cr) / total * 100).toFixed(1) : "0.0";
+            window.parent.postMessage({
+                type:       "nback-complete",
+                nbackLevel: String(nback),
+                nBackFA:    String(fa),
+                nBackMISS:  String(miss),
+                hits:       String(hits),
+                accuracy:   accuracy
+            }, "*");
+            // --- end postMessage block ---
+
             if (config.showResults) {
                 displayResults(config);
             } else {
