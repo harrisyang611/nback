@@ -1,3 +1,3 @@
-I need to run this nback test on an iPad, so it has to be compatiable with a touchscreen, how can I implement this? 
+based on ./nback-image_standalone.html. implement this image feature for the nback-touchscreen-standalone.html
 
-Write in claude_doc/ipad_prop.md file
+run a thorogh testing afterward.
